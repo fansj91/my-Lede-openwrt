@@ -201,4 +201,4 @@ jobs:
         status: ${{ needs.build.result }}
         notify_when: "failure"
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}  # 确保名称匹配
