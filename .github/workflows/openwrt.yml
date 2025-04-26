@@ -147,6 +147,7 @@ jobs:
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         DEVICE=$(cat DEVICE_NAME)
         echo "FIRMWARE_NAME=OpenWrt_${{ env.REPO_BRANCH }}_${DEVICE}_$(date +"%Y%m%d")" >> $GITHUB_ENV
+        echo "TAG_NAME=v$(date +"%Y%m%d")-$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "✅ 固件编译完成"
         
     - name: 🧹 空间清理
@@ -187,13 +188,21 @@ jobs:
         rm -rf packages
         echo "FIRMWARE_PATH=$(pwd)" >> $GITHUB_ENV
         echo "✅ 固件目录定位完成: $FIRMWARE_DIR"
+        
+    - name: 🏷️ 创建Git标签
+      if: success()
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git tag ${{ env.TAG_NAME }}
+        git push origin ${{ env.TAG_NAME }}
 
     - name: 🚀 上传固件
       uses: softprops/action-gh-release@master
       if: success()
       with:
         name: ${{ env.FIRMWARE_NAME }}
-        tag_name: ${{ steps.tag_version.outputs.tag_name }}
+        tag_name: ${{ env.TAG_NAME }}
         files: ${{ env.FIRMWARE_PATH }}/*
         draft: false
         prerelease: false
