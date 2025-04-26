@@ -177,7 +177,7 @@ jobs:
         echo "✅ 固件目录定位完成: $FIRMWARE_DIR"
 
     - name: 🚀 上传固件
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3.1.4  # ✅ 显式指定稳定版本
       if: success()
       with:
         name: ${{ env.FIRMWARE_NAME }}
