@@ -193,7 +193,10 @@ jobs:
       if: success()
       with:
         name: ${{ env.FIRMWARE_NAME }}
-        path: ${{ env.FIRMWARE_PATH }}
+        tag_name: ${{ steps.tag_version.outputs.tag_name }}
+        files: ${{ env.FIRMWARE_PATH }}/*
+        draft: false
+        prerelease: false
 
     - name: 🗑️ 清理旧构建
       uses: kolpav/purge-artifacts-action@v1
