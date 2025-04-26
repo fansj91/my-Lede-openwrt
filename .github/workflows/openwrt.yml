@@ -160,18 +160,30 @@ jobs:
       run: |
         # 动态定位固件目录
         echo "定位固件目录..."
-        FIRMWARE_DIR=$(find openwrt/bin/targets/ -type d -name 'images' 2>/dev/null | head -n 1)
+        # 智能文件检测模式
+        FIRMWARE_DIR=$(find openwrt/bin/targets/ -type f \( -name "*.bin" -o -name "*.img" \) -exec dirname {} \; | uniq | head -n 1)
+        
+        # 回退机制
         if [ -z "$FIRMWARE_DIR" ]; then
-          FIRMWARE_DIR=$(find openwrt/bin/targets/ -type d -name 'files' 2>/dev/null | head -n 1)
+          FIRMWARE_DIR=$(find openwrt/bin/targets/ -type d -name 'images' 2>/dev/null | head -n 1)
+          [ -z "$FIRMWARE_DIR" ] && FIRMWARE_DIR=$(find openwrt/bin/targets/ -type d -name 'files' 2>/dev/null | head -n 1)
         fi
         
+        # 最终验证
         if [ -z "$FIRMWARE_DIR" ]; then
           echo "❌ 未找到固件目录"
-          find openwrt/bin/targets/ -type d 2>/dev/null
+          find openwrt/bin/targets/ -type d -exec sh -c 'echo -n "{}: "; find "$1" -maxdepth 1 -name "*.bin" -o -name "*.img" | wc -l' _ {} \;
           exit 1
         fi
         
-        cd "$FIRMWARE_DIR" || { echo "❌ 无法进入固件目录"; exit 1; }
+        # 安全路径处理
+        cd "${FIRMWARE_DIR%/}" || { 
+          echo "❌ 路径验证失败"
+          echo "📂 原始路径: $FIRMWARE_DIR"
+          echo "🔠 编码转换: $(echo "$FIRMWARE_DIR" | xxd)"
+          exit 1 
+        }
+        
         rm -rf packages
         echo "FIRMWARE_PATH=$(pwd)" >> $GITHUB_ENV
         echo "✅ 固件目录定位完成: $FIRMWARE_DIR"
@@ -189,16 +201,3 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         expire-in: 7days
 
-  post-run:
-    runs-on: ubuntu-22.04
-    if: always()
-    needs: build
-    steps:
-    - name: 📢 构建状态通知
-      uses: ravsamhq/notify-slack-action@v2
-      if: always()
-      with:
-        status: ${{ needs.build.result }}
-        notify_when: "failure"
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}  # 确保名称匹配
