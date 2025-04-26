@@ -146,8 +146,10 @@ jobs:
         # 提取设备信息
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         DEVICE=$(cat DEVICE_NAME)
+        DATE=$(date +"%Y%m%d")
         echo "FIRMWARE_NAME=OpenWrt_${{ env.REPO_BRANCH }}_${DEVICE}_$(date +"%Y%m%d")" >> $GITHUB_ENV
-        echo "TAG_NAME=v$(date +"%Y%m%d")-$(cat DEVICE_NAME)" >> $GITHUB_ENV
+        # echo "TAG_NAME=v$(date +"%Y%m%d")-$(cat DEVICE_NAME)" >> $GITHUB_ENV
+        echo "TAG_NAME=v${DATE}" >> $GITHUB_ENV  # 标签格式：v20250427
         echo "✅ 固件编译完成"
         
     - name: 🧹 空间清理
