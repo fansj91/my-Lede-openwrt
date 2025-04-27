@@ -194,7 +194,7 @@ jobs:
     - name: 🏷️ 创建Git标签
       if: success()
       run: |
-        TAG_NAME="v$(date +"%Y%m%d-%H.%M.%S")"  # 生成格式如v20250427123045
+        TAG_NAME="v$(date +"%Y%m%d-%H.%M.%S")"  # 生成格式如v20250427-12.30.45
         echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV  # 写入环境变量
          
         git config --local user.email "action@github.com"
