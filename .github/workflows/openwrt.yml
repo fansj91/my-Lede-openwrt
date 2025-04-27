@@ -149,7 +149,7 @@ jobs:
         DATE=$(date +"%Y%m%d")
         echo "FIRMWARE_NAME=OpenWrt_${{ env.REPO_BRANCH }}_${DEVICE}_$(date +"%Y%m%d")" >> $GITHUB_ENV
         # echo "TAG_NAME=v$(date +"%Y%m%d")-$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        echo "TAG_NAME=v${DATE}" >> $GITHUB_ENV  # 标签格式：v20250427
+        # echo "TAG_NAME=v${DATE}" >> $GITHUB_ENV  # 标签格式：v20250427
         echo "✅ 固件编译完成"
         
     - name: 🧹 空间清理
@@ -199,12 +199,18 @@ jobs:
         git tag ${{ env.TAG_NAME }}
         git push origin ${{ env.TAG_NAME }}
 
+    - name: 生成标签
+      id: tag_version
+      run: |
+        echo "tag_name=OpenWrt-${{ env.FIRMWARE_NAME }}" >> $GITHUB_OUTPUT
+        
     - name: 🚀 上传固件
       uses: softprops/action-gh-release@master
       if: success()
       with:
         name: ${{ env.FIRMWARE_NAME }}
-        tag_name: ${{ env.TAG_NAME }}
+        tag: ${{ steps.tag_version.outputs.tag_name }}  # 关键参数
+        # tag_name: ${{ env.TAG_NAME }}
         files: ${{ env.FIRMWARE_PATH }}/*
         draft: false
         prerelease: false
