@@ -222,7 +222,7 @@ jobs:
       if: success()
       with:
         name: ${{ env.FIRMWARE_NAME }}
-        tag_name: ${{ steps.TAG_NAME }}  # 关键参数
+        tag_name: ${{ env.TAG_NAME }}   # 关键参数
         files: ${{ env.FIRMWARE_PATH }}/*
         draft: false
         prerelease: false
